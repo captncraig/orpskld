@@ -1,0 +1,98 @@
+<html>
+
+<head>
+<style>
+	#template{
+		width: 100%;
+		text-align: center;
+		font-size: 500%;
+	}
+	#inputDiv{
+		width: 100%;
+		text-align: center;
+	}
+	#ta{
+		margin-left: auto;
+		margin-right: auto;
+		width: 500px;
+		height: 40px;
+		line-height:35px;
+		font-size: 200%;
+		text-align: center;
+	}
+</style>
+</head>
+<body>
+<div id="template">Go dog Go</div>
+<div id="inputDiv">
+	<input type="text" id="ta"></input>
+</div>
+<script>
+
+String.prototype.shuffle = function () {
+    var a = this.split(""),
+        n = a.length;
+
+    for(var i = n - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = a[i];
+        a[i] = a[j];
+        a[j] = tmp;
+    }
+    return a.join("");
+}
+charMap = {};
+var alpha = "abcdefghijklmnopqrstuvwxyz";
+var shuffled = alpha.shuffle();
+for (var i = 0; i< 26; i++){
+	var actual = alpha[i];
+	var map = shuffled[i];
+	charMap[actual] = map;
+	charMap[actual.toUpperCase()] = map.toUpperCase();
+}
+console.log(charMap)
+document.getElementById("ta").onkeypress = function(evt) {
+    var val = this.value;
+    evt = evt || window.event;
+
+    // Ensure we only handle printable keys, excluding enter and space
+    var charCode = typeof evt.which == "number" ? evt.which : evt.keyCode;
+    if (charCode && charCode != 13 && charCode != 32) {
+        var keyChar = String.fromCharCode(charCode);
+        // Get the mapped character (default to "X" for illustration purposes)
+        var mappedChar = charMap[keyChar] || keyChar;
+        var start, end;
+        if (typeof this.selectionStart == "number" && typeof this.selectionEnd == "number") {
+            // Non-IE browsers and IE 9
+            start = this.selectionStart;
+            end = this.selectionEnd;
+            this.value = val.slice(0, start) + mappedChar + val.slice(end);
+
+            // Move the caret
+            this.selectionStart = this.selectionEnd = start + 1;
+        } else if (document.selection && document.selection.createRange) {
+            // For IE up to version 8
+            var selectionRange = document.selection.createRange();
+            var textInputRange = this.createTextRange();
+            var precedingRange = this.createTextRange();
+            var bookmark = selectionRange.getBookmark();
+            textInputRange.moveToBookmark(bookmark);
+            precedingRange.setEndPoint("EndToStart", textInputRange);
+            start = precedingRange.text.length;
+            end = start + selectionRange.text.length;
+
+            this.value = val.slice(0, start) + mappedChar + val.slice(end);
+            start++;
+
+            // Move the caret
+            textInputRange = this.createTextRange();
+            textInputRange.collapse(true);
+            textInputRange.move("character", start - (this.value.slice(0, start).split("\r\n").length - 1));
+            textInputRange.select();
+        }
+        return false;
+    }
+};
+</script>
+</body>
+</html>
