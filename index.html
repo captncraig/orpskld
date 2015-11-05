@@ -1,6 +1,7 @@
 <html>
 
 <head>
+<script src="jquery.js"></script>
 <style>
 	#template{
 		width: 100%;
@@ -14,20 +15,37 @@
 	#ta{
 		margin-left: auto;
 		margin-right: auto;
-		width: 500px;
+		width: 100%;
 		height: 40px;
 		line-height:35px;
 		font-size: 200%;
 		text-align: center;
 	}
+	.green{
+		background-color: green;
+	}
 </style>
 </head>
 <body>
-<div id="template">Go dog Go</div>
+<div id="template"></div>
 <div id="inputDiv">
 	<input type="text" id="ta"></input>
 </div>
 <script>
+
+var targets = [
+	"Go dog, Go",
+	"Great! Don't get lost.",
+	"Hard, Isn't it?",
+	"She sells seashells by the sea shore.",
+	"Peter Piper picked a Peck of Pickled Peppers",
+	"AbCdEfGhijKLnmOPqRstUwvyZ",
+	"The quick brown fox jumped over the lazy dog."
+];
+
+var currentProblem = 0;
+var problemText = targets[currentProblem];
+$("#template").text(problemText);
 
 String.prototype.shuffle = function () {
     var a = this.split(""),
@@ -44,17 +62,17 @@ String.prototype.shuffle = function () {
 charMap = {};
 var alpha = "abcdefghijklmnopqrstuvwxyz";
 var shuffled = alpha.shuffle();
+//shuffled = alpha;
 for (var i = 0; i< 26; i++){
 	var actual = alpha[i];
 	var map = shuffled[i];
 	charMap[actual] = map;
 	charMap[actual.toUpperCase()] = map.toUpperCase();
 }
-console.log(charMap)
 document.getElementById("ta").onkeypress = function(evt) {
     var val = this.value;
     evt = evt || window.event;
-
+	ret = true;
     // Ensure we only handle printable keys, excluding enter and space
     var charCode = typeof evt.which == "number" ? evt.which : evt.keyCode;
     if (charCode && charCode != 13 && charCode != 32) {
@@ -90,9 +108,31 @@ document.getElementById("ta").onkeypress = function(evt) {
             textInputRange.move("character", start - (this.value.slice(0, start).split("\r\n").length - 1));
             textInputRange.select();
         }
-        return false;
+        ret = false;
     }
+	highlightProgress()
+	return ret;
 };
+
+function highlightProgress(){
+	var work = $("#ta").val();
+	var goodCount = 0;
+	if (work == problemText){
+		currentProblem++;
+		problemText = targets[currentProblem];
+		$("#template").html(problemText);
+		$("#ta").val("")
+		return
+	}
+	for (var i = 0; i<work.length; i++){
+		if (work[i] == problemText[i]){
+			goodCount++
+			continue
+		}
+		break;
+	}
+	$("#template").html("<span class='green'>" + problemText.substr(0,goodCount) +"</span>"+ problemText.substr(goodCount))
+}
 </script>
 </body>
 </html>
